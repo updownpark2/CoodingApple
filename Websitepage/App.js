@@ -3,14 +3,19 @@ import Corona from "./Corona.js";
 import Todolistinput from "./Todolistinput.js";
 import Todolistresult from "./Todolistresult.js";
 export default function App({ $target }) {
-  this.data = null ? [] : JSON.parse(localStorage.getItem("todolist")); //처음로딩할때
-  this.setState = function (newdata) {
+  if (localStorage.getItem("todolist") === null) {
+    // localstorage.getitem ===null 인경우 JSON하면 오류가 발생한다.
+    this.data = [];
+  } else {
+    this.data = JSON.parse(localStorage.getItem("todolist"));
+  }
+
+  this.setState = (newdata) => {
     this.data = newdata;
     localStorage.setItem("todolist", JSON.stringify(this.data));
     console.log(this.data);
-    todolistresult.set;
+    todolistresult.setState(this.data);
   };
-
   const header = new Header({
     $target,
     Time: (HDbox) => {
@@ -26,12 +31,25 @@ export default function App({ $target }) {
     },
   });
 
-  const corona = new Corona({ $target });
-
   const todolistinput = new Todolistinput({
     $target,
+    data: this.data,
     onSubmit: (inputvalue) => {
       this.setState([...this.data, inputvalue]);
     },
   });
+
+  const todolistresult = new Todolistresult({
+    $target,
+    onRemove: (LIID) => {
+      const newdata = this.data.filter(function (item, index) {
+        return index != LIID * 1;
+      });
+      this.setState(newdata);
+    },
+    data: this.data,
+  });
+
+  const corona = new Corona({ $target });
+  //const todolistresult = new Todolistresult({ $target, data: this.data });
 }
